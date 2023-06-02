@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Robotarium Block Coding Interface</title>
+  <link rel="icon" href="Help Pages/Images/robotariam_icon.png">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+    integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"
+    integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13"
+    crossorigin="anonymous"></script>
+  <!-- where all of the block files are found -->
+  <script src="./node_modules/blockly/blockly_compressed.js"></script>
+  <script src="./node_modules/blockly/blocks_compressed.js"></script>
+  <script src="./node_modules/blockly/python_compressed.js"></script>
+  <script src="./node_modules/blockly/msg/en.js"></script>
+  <script src="./node_modules/blockly/blocks/lists.js"></script>
+  <script src="./node_modules/blockly/blocks/colour.js"></script>
+  <script src=".\FileSaver.js-master\dist\FileSaver.js"></script>
+  <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="bootstrap/js/bootstrap.min.js"></script> 
+
+  <!--This where the python that creates the output of the custom blocks-->
+  <script src="./node_modules/blockly/generators/python/robotarium.js"></script>
+  <!--This where the JSON that creates the visual of the custom blocks-->
+  <script src="./node_modules/blockly/blocks/robotarium.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+
+  <style>
+    body {
+      background-color: #fff;
+      font-family: sans-serif;
+    }
+
+    h1 {
+      font-weight: normal;
+      font-size: 140%;
+    }
+
+    textarea {
+      width: 50%;
+    }
+  </style>
+
+</head>
+
+<body onload="pingBackend()">
+  <table style="width: 100%;">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark static-top">
+      <div class="container">
+        <a class="navbar-brand" href="#">
+          <img src="Help Pages/Images/robotarium_header.png" sizes="" style="height: 40px; right: 10px;">
+        </a>
+        <sub id="loadingText" class="nav-item" style="color:whitesmoke; font-size: large;"></sub>
+        <img id="loadingGif" src="https://bison.usgs.gov/images/spinner2.gif" style="display: none; height: 40px; margin-left: 10px;">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent" style="font-size: 15px">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="#">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://www.robotarium.gatech.edu/dashboard">Robotarium</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="ShowPButton" href="javascript:;" onClick="flipCode()">Show Python</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="refresh" href="javascript:;" style="display: none;" onClick="refreshCode()">Refresh Python</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="ShowPButton" href="javascript:;" onClick="simCode()">Simulate</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="ShowPButton" href="javascript:;" onClick="Download()">Download Python</a>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown"
+                aria-expanded="false">
+                Save
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown" style="font-size: 15px">
+                <li><button class="dropdown-item" href="" data-toggle="modal" data-target="#SaveModal" onClick="writeSave()">Create Save</button></li>
+                <button type="button" class="dropdown-item" data-toggle="modal" data-target="#DeleteModel" onclick="updateDropdown()">Delete Save</button>
+                <button type="button" class="dropdown-item" data-toggle="modal" data-target="#LoadModel" onclick="updateDropdown()">Load Save</button>
+              </ul>
+            </li>
+            <li class="nav-item dropdown" >
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown"
+                aria-expanded="false">
+                Import/Export
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown" style="font-size: 15px">
+                <li><button class="dropdown-item" href="" onClick="downloadBlocks()">Export Blocks</button></li>
+                <button type="button" class="dropdown-item" data-toggle="modal" data-target="#ImportModel">Import Blocks</button>
+              </ul>
+            </li>
+            <li class="nav-item dropdown" >
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown"
+                aria-expanded="false">
+                More
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown" style="font-size: 15px">
+                <li><a class="dropdown-item" href="https://forms.gle/bsiy5sgNZjAYL15Y8" target="_blank">Report Bug</a></li>
+                <li><a class="dropdown-item" href="Help Pages/About.html">About</a></li>
+                <li><a class="dropdown-item" href="Help Pages/AboutTheRobotarium.html">Help</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <tr>
+      <td style="width: 35%">
+        <!-- <img id="img1" src="graph.png" style="height: 120px;"> /-->
+      </td>
+    </tr>
+  </table>
+
+  <div class="modal fade" id="SaveModal" role="dialog">
+    <div class="modal-dialog">
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title" style="text-align: left">Write Save</h4>
+        </div>
+        <div class="modal-body">
+            <select id="dropdownFiles3">
+                <option> ---Choose Save--- </option>
+            </select>
+            <button type="button" class="btn btn-default" onclick="overwriteSave()" data-dismiss="modal">Overwrite Save</button> 
+            <hr>
+            <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <button onclick="writeSave()" class="btn btn-default" type="button" data-dismiss="modal">New Save</button>
+              </div>
+              <input type="text" class="form-control" placeholder="New Save Name" aria-label="" aria-describedby="basic-addon1" id="saveInput">
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal" onclick="document.getElementById('saveInput').value = '';">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="DeleteModel" role="dialog">
+    <div class="modal-dialog">
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title" style="text-align: left">Delete Save</h4>
+        </div>
+        <div class="modal-body">
+            <select id="dropdownFiles">
+                <option> ---Choose Save--- </option>
+            </select>
+            <button type="button" class="btn btn-default" onclick="deleteSaveStr()" data-dismiss="modal">Delete</button> 
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="LoadModel" role="dialog">
+    <div class="modal-dialog">
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Load Save</h4>
+        </div>
+        <div class="modal-body">
+            <select id="dropdownFiles2" onchange="">
+                <option> ---Choose Save--- </option>
+            </select>
+            <button type="button" class="btn btn-default" onclick="getSave()" data-dismiss="modal">Load</button> 
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="ImportModel" role="dialog">
+    <div class="modal-dialog">
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Import Blocks</h4>
+        </div>
+        <div class="modal-body">
+          <input type="file" name="file" id="file">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div id="blocklyDiv" style="height: 600px; width: 100%;"></div>
+  <iFrame id="video" src="https://sim-server-robo.herokuapp.com/static/uploads/video.mp4"
+    style="width:100%; height:500px;display: none"></iFrame>
+  <div id="Map" style="width: 100%;">
+    <img src="./graph.png" style="display: block; margin-left: auto; margin-right: auto; width: 75%;">
+  </div>
+  
+  <pre style="width:50%;" class="prettyprint" id="code"></pre>
+
+  <!-- The individual blocks are imported to the menu -->
+  <!-- This xml file is all of the blocks that will be in the toolbox on the left-->
+  <xml xmlns="https://developers.google.com/blockly/xml" id="toolbox" style="display: none">
+
+    <!-- Logic imported -->
+    <category name="Logic" colour="%{BKY_LOGIC_HUE}">
+      <block type="controls_if"></block>
+      <block type="controls_ifelse"></block>
+      <block type="logic_compare"></block>
+      <block type="logic_operation"></block>
+      <block type="logic_negate"></block>
+      <block type="logic_boolean"></block>
+      <block type="logic_null"></block>
+      <block type="logic_ternary"></block>
+    </category>
+
+    <!-- loops imported -->
+
+    <category name="Loops" colour="%{BKY_LOOPS_HUE}">
+      <block type="controls_repeat_ext">
+        <value name="TIMES">
+          <block type="math_number">
+            <field name="NUM">10</field>
+          </block>
+        </value>
+      </block>
+      <block type="controls_whileUntil"></block>
+      <block type="controls_repeat"></block>
+      <block type="controls_for"></block>
+      <block type="controls_forEach"></block>
+      <block type="controls_flow_statements"></block>
+    </category>
+
+    <!-- math imported -->
+
+    <category name="Math" colour="%{BKY_MATH_HUE}">
+      <block type="math_number">
+        <field name="NUM">123</field>
+      </block>
+      <block type="math_arithmetic">
+        <value name="A">
+          <shadow type="math_number">
+            <field name="NUM">1</field>
+          </shadow>
+        </value>
+        <value name="B">
+          <shadow type="math_number">
+            <field name="NUM">1</field>
+          </shadow>
+        </value>
+      </block>
+      <block type="math_single">
+        <value name="NUM">
+          <shadow type="math_number">
+            <field name="NUM">9</field>
+          </shadow>
+        </value>
+      </block>
+      <block type="math_trig">
+        <value name="NUM">
+          <shadow type="math_number">
+            <field name="NUM">45</field>
+          </shadow>
+        </value>
+      </block>
+      <block type="math_constant"></block>
+      <block type="math_number_property">
+        <value name="NUMBER_TO_CHECK">
+          <shadow type="math_number">
+            <field name="NUM">0</field>
+          </shadow>
+        </value>
+      </block>
+      <block type="math_round">
+        <value name="NUM">
+          <shadow type="math_number">
+            <field name="NUM">3.1</field>
+          </shadow>
+        </value>
+      </block>
+      <block type="math_on_list"></block>
+      <block type="math_modulo">
+        <value name="DIVIDEND">
+          <shadow type="math_number">
+            <field name="NUM">64</field>
+          </shadow>
+        </value>
+        <value name="DIVISOR">
+          <shadow type="math_number">
+            <field name="NUM">10</field>
+          </shadow>
+        </value>
+      </block>
+      <block type="math_constrain">
+        <value name="VALUE">
+          <shadow type="math_number">
+            <field name="NUM">50</field>
+          </shadow>
+        </value>
+        <value name="LOW">
+          <shadow type="math_number">
+            <field name="NUM">1</field>
+          </shadow>
+        </value>
+        <value name="HIGH">
+          <shadow type="math_number">
+            <field name="NUM">100</field>
+          </shadow>
+        </value>
+      </block>
+      <block type="math_random_int">
+        <value name="FROM">
+          <shadow type="math_number">
+            <field name="NUM">1</field>
+          </shadow>
+        </value>
+        <value name="TO">
+          <shadow type="math_number">
+            <field name="NUM">100</field>
+          </shadow>
+        </value>
+      </block>
+      <block type="math_random_float"></block>
+      <block type="math_atan2">
+        <value name="X">
+          <shadow type="math_number">
+            <field name="NUM">1</field>
+          </shadow>
+        </value>
+        <value name="Y">
+          <shadow type="math_number">
+            <field name="NUM">1</field>
+          </shadow>
+        </value>
+      </block>
+    </category>
+
+    <!--    <category name="Variables" colour="%{BKY_TEXTS_HUE}">
+
+    </category> -->
+    <!-- Text Blocks Imported -->
+
+    <category name="Text" colour="%{BKY_TEXTS_HUE}">
+      <block type="text"></block>
+      <block type="text_join"></block>
+      <block type="text_append">
+        <value name="TEXT">
+          <shadow type="text"></shadow>
+        </value>
+      </block>
+      <block type="text_length">
+        <value name="VALUE">
+          <shadow type="text">
+            <field name="TEXT">abc</field>
+          </shadow>
+        </value>
+      </block>
+      <block type="text_isEmpty">
+        <value name="VALUE">
+          <shadow type="text">
+            <field name="TEXT"></field>
+          </shadow>
+        </value>
+      </block>
+      <block type="text_indexOf">
+        <value name="VALUE">
+          <block type="variables_get">
+            <field name="VAR">{textVariable}</field>
+          </block>
+        </value>
+        <value name="FIND">
+          <shadow type="text">
+            <field name="TEXT">abc</field>
+          </shadow>
+        </value>
+      </block>
+      <block type="text_charAt">
+        <value name="VALUE">
+          <block type="variables_get">
+            <field name="VAR">{textVariable}</field>
+          </block>
+        </value>
+      </block>
+      <block type="text_getSubstring">
+        <value name="STRING">
+          <block type="variables_get">
+            <field name="VAR">{textVariable}</field>
+          </block>
+        </value>
+      </block>
+      <block type="text_changeCase">
+        <value name="TEXT">
+          <shadow type="text">
+            <field name="TEXT">abc</field>
+          </shadow>
+        </value>
+      </block>
+      <block type="text_trim">
+        <value name="TEXT">
+          <shadow type="text">
+            <field name="TEXT">abc</field>
+          </shadow>
+        </value>
+      </block>
+      <block type="text_print">
+        <value name="TEXT">
+          <shadow type="text">
+            <field name="TEXT">abc</field>
+          </shadow>
+        </value>
+      </block>
+      <block type="text_prompt_ext">
+        <value name="TEXT">
+          <shadow type="text">
+            <field name="TEXT">abc</field>
+          </shadow>
+        </value>
+      </block>
+    </category>
+
+
+    <!-- List Blocks Imported -->
+
+    <category name="Lists" colour="%{BKY_LISTS_HUE}">
+      <block type="lists_create_with">
+        <mutation items="0"></mutation>
+      </block>
+      <block type="lists_create_with"></block>
+      <block type="lists_repeat">
+        <value name="NUM">
+          <shadow type="math_number">
+            <field name="NUM">5</field>
+          </shadow>
+        </value>
+      </block>
+      <block type="lists_length"></block>
+      <block type="lists_isEmpty"></block>
+      <block type="lists_indexOf">
+        <value name="VALUE">
+          <block type="variables_get">
+            <field name="VAR">{listVariable}</field>
+          </block>
+        </value>
+      </block>
+      <block type="lists_getIndex">
+        <value name="VALUE">
+          <block type="variables_get">
+            <field name="VAR">{listVariable}</field>
+          </block>
+        </value>
+      </block>
+      <block type="lists_setIndex">
+        <value name="LIST">
+          <block type="variables_get">
+            <field name="VAR">{listVariable}</field>
+          </block>
+        </value>
+      </block>
+      <block type="lists_getSublist">
+        <value name="LIST">
+          <block type="variables_get">
+            <field name="VAR">{listVariable}</field>
+          </block>
+        </value>
+      </block>
+      <block type="lists_split">
+        <value name="DELIM">
+          <shadow type="text">
+            <field name="TEXT">,</field>
+          </shadow>
+        </value>
+      </block>
+      <block type="lists_sort"></block>
+    </category>
+
+    <!-- Color Blocks Imported -->
+
+    <category name="Color" colour="%{BKY_COLOUR_HUE}">
+      <block type="colour_picker"></block>
+      <block type="colour_random"></block>
+      <block type="colour_rgb">
+        <value name="RED">
+          <shadow type="math_number">
+            <field name="NUM">100</field>
+          </shadow>
+        </value>
+        <value name="GREEN">
+          <shadow type="math_number">
+            <field name="NUM">50</field>
+          </shadow>
+        </value>
+        <value name="BLUE">
+          <shadow type="math_number">
+            <field name="NUM">0</field>
+          </shadow>
+        </value>
+      </block>
+      <block type="colour_blend">
+        <value name="COLOUR1">
+          <shadow type="colour_picker">
+            <field name="COLOUR">#ff0000</field>
+          </shadow>
+        </value>
+        <value name="COLOUR2">
+          <shadow type="colour_picker">
+            <field name="COLOUR">#3333ff</field>
+          </shadow>
+        </value>
+        <value name="RATIO">
+          <shadow type="math_number">
+            <field name="NUM">0.5</field>
+          </shadow>
+        </value>
+      </block>
+    </category>
+    <!-- Variable Blocks Imported-->
+
+    <category name="Variables" colour="%{BKY_VARIABLES_HUE}" custom="VARIABLE"></category>
+
+    <!-- Robotarium Blocks Imported -->
+
+    <category name="Universal" colour="%{BKY_LOOPS_HUE}">
+      <block type="display_image"></block>
+      <block type="display_Maze"></block>
+      <block type="drawing_type"></block>
+      <block type="new_polygon"></block>
+      <block type="new_circle"></block>
+      <block type="new_rec"></block>
+      <block type="new_line"></block>
+    </category>
+
+    <category name="Robot" colour="%{BKY_MATH_HUE}">
+      <block type="new_robot"></block>
+      <block type="run_to_point_and_angle"></block>
+      <block type="run_to_point"></block>
+      <block type="move_forward"></block>
+      <block type="turn_by_angle"></block>
+      <block type="turn_to"></block>
+      <block type="pen_down"></block>
+      <block type="pen_up"></block>
+      <block type="send_message"></block>
+      <block type="wait_until_message"></block>
+      <block type="wait"></block>
+    </category>
+    <category name="Functions" colour="%{BKY_PROCEDURES_HUE}" custom="PROCEDURE"></category>
+
+
+  </xml>
+
+  <!-- This xml file is the starting blocks that defalt in the begining-->
+  <xml xmlns="https://developers.google.com/blockly/xml" id="startBlocks" style="display: none">
+    <block type="new_robot">
+      <field name="name">Bob</field>
+      <next>
+        <block type="run_to_point">
+          <field name="target_x">.8</field>
+          <field name="target_y">.8</field>
+        </block>
+      </next>
+    </block>
+  </xml>
+
+  <script>
+    // rpsString = "";
+
+    var demoWorkspace = Blockly.inject('blocklyDiv',
+      {
+        media: 'https://unpkg.com/blockly/media/',
+        toolbox: document.getElementById('toolbox')
+      });
+
+    Blockly.Xml.domToWorkspace(document.getElementById('startBlocks'), demoWorkspace);
+
+    function updateFile() {
+      Blockly.Python.INFINITE_LOOP_TRAP = null;
+      var fr = new FileReader();
+      // var rpsString = "import rps.robotarium as robotarium\nImageRoot= \"./rps/examples/Custom_Test/Sprites/\"";
+      //This String goes before any block code and initializes everything
+      var initialize = `
+
+# importing necesary robotarium libraries
+import time
+
+from robot_movement import RobotMovement
+
+
+# robots for the current simulation
+robotMoveObj = RobotMovement()
+
+`;
+      //This String goes after all of the block code and it has all of the running parts
+      var end = `
+# run the simulation
+start_time = time.time()
+return_message = robotMoveObj.Run_Robotarium()
+
+if return_message == "Done":
+    print("--- Whole simulation time spent is: %s seconds ---" % (time.time() - start_time))
+`;
+
+      var code = initialize + Blockly.Python.workspaceToCode(demoWorkspace) + end;//puts all of code togeather
+
+      // var pythonFile = null;//creates python file
+      // var data = new Blob([rpsString + code], { type: 'text/x-python' });
+      // if (pythonFile !== null) {
+      //   window.URL.revokeObjectURL(pythonFile);
+      // }
+      // pythonFile = window.URL.createObjectURL(data);
+      // document.getElementById("download").href = pythonFile;
+      return code;
+    }
+
+    showCode = true;
+
+    function loadXHR(url) {
+      return new Promise(function (resolve, reject) {
+        try {
+          var xhr = new XMLHttpRequest();
+          xhr.open("GET", url);
+          xhr.responseType = "blob";
+          xhr.onerror = function () { reject("Network error.") };
+          xhr.onload = function () {
+            if (xhr.status === 200) { resolve(xhr.response) }
+            else { reject("Loading error:" + xhr.statusText) }
+          };
+          xhr.send();
+        }
+        catch (err) { reject(err.message) }
+      });
+    }
+
+    function findImages(code) {
+      flag = false;
+      imageList = []
+      charArray = []
+      for (let i = 0; i < code.length; i++) {
+        if (flag) {
+          charArray.push(code.charAt(i));
+        }
+        if (code.charAt(i) == '@') {
+          flag = true;
+        } else if (code.charAt(i) == '&') {
+          flag = false;
+          imageList.push(charArray.join('').slice(0, charArray.join('').length - 1));
+          charArray = [];
+        }
+      }
+      newImageList = [];
+      for (let i = 0; i < imageList.length; i++) {
+        if (newImageList.includes(imageList[i])) {
+
+        } else {
+          newImageList.push(imageList[i]);
+        }
+      }
+      return (newImageList);
+    }
+
+    function Download() {
+      console.log("download");
+      // var rpsString = "import rps.robotarium as robotarium\nImageRoot= \"\"";
+      var data = new Blob([updateFile()], { type: 'text/x-python' });
+      saveAs(data, "output.py")
+      list = findImages(updateFile());
+      l = 0;
+      p = list.length
+      for (i = 0; i < list.length; i++) {
+        loadXHR('https://raw.githubusercontent.com/avayedawadi/BlockProject/main/Sprites/' + list[i] + '.png').then(function (blob) {
+          if (p <= 1) {
+            saveAs(blob, String(list) + ".png");
+          } else {
+            saveAs(blob, String(list[l]) + ".png");
+          }
+          l++;
+        });
+      }
+    }
+
+
+    function flipCode() {//Shows code at bottom of screen
+      if (showCode) {
+        // var rpsString = "import rps.robotarium as robotarium\nImageRoot= \"\"";
+        updateFile();
+        document.getElementById("code").style.height = "auto";
+        document.getElementById("code").innerHTML = updateFile();
+        showCode = !showCode;
+        document.getElementById('ShowPButton').innerHTML = "Hide Python";
+        document.getElementById('refresh').style.display = 'block'
+      } else {
+        showCode = !showCode;
+        document.getElementById('ShowPButton').innerHTML = "Show Python";
+        document.getElementById('refresh').style.display = 'none';
+        document.getElementById("code").style.height = "auto";
+        document.getElementById("code").innerHTML = "";
+      }
+    }
+
+    function refreshCode() {
+      document.getElementById("code").innerHTML = updateFile();
+    }
+
+    function saveCode() {
+      var xmlDom = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
+      var xmlText = Blockly.Xml.domToPrettyText(xmlDom);
+      window.localStorage.setItem("BlocklyCode", xmlText);
+    }
+
+    function getSave() {
+      saveStr = document.getElementById('dropdownFiles2').value;
+      window.localStorage.setItem("mostRecent", saveStr);
+      console.log(saveStr);
+      xml = window.localStorage.getItem(saveStr);
+      if (typeof xml != "string" || xml.length < 5) {
+        alert("No save named " + saveStr + " is available.")
+      }
+
+
+
+      try {
+        var dom = Blockly.Xml.textToDom(xml);
+        Blockly.mainWorkspace.clear();
+        Blockly.Xml.domToWorkspace(Blockly.mainWorkspace, dom);
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function deleteSaveStr() {
+      var selectobject = document.getElementById("dropdownFiles").value;
+      console.log(selectobject)
+      var x = document.getElementById("dropdownFiles");
+      x.remove(x.selectedIndex);
+      var y = document.getElementById("dropdownFiles2");
+      y.remove(y.selectedIndex);
+      var z = document.getElementById("dropdownFiles3");
+      z.remove(z.selectedIndex);
+      
+      function allStorage() {
+
+        var values = [],
+          keys = Object.keys(localStorage),
+          i = keys.length;
+
+        while (i--) {
+          values.push(localStorage.getItem(keys[i]));
+        }
+
+        return keys;
+      }
+      if (typeof window.localStorage.getItem(selectobject) != "string") {
+        return false;
+      }
+      window.localStorage.removeItem(selectobject)
+      itemArr = allStorage();
+      console.log(itemArr);
+      if (itemArr.length != 0) {
+        for(let i = 0; i < itemArr.length; i++){
+          if(itemArr[0] != "mostRecent" && itemArr[0] != null){
+            window.localStorage.setItem("mostRecent", itemArr[0]);
+          }
+        }
+      };
+    }
+
+
+
+    function writeSave() {
+      saveStr = document.getElementById("saveInput").value;
+      document.getElementById('saveInput').value = '';
+      if(saveStr != null && saveStr.trim() != "" && window.localStorage.getItem(saveStr) == null){
+        var xmlDom = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
+        var xmlText = Blockly.Xml.domToPrettyText(xmlDom);
+        window.localStorage.setItem(saveStr, xmlText);
+        window.localStorage.setItem("mostRecent", saveStr);
+
+        var option = document.createElement("option");
+        option.value = saveStr;
+        option.text = saveStr;
+        var x = document.getElementById("dropdownFiles");
+        x.appendChild(option)
+        var y = document.getElementById("dropdownFiles2");
+        y.appendChild(option);
+        var z = document.getElementById("dropdownFiles3");
+        z.appendChild(option);
+      }
+    }
+
+    function overwriteSave(){
+      var selectobject = document.getElementById("dropdownFiles3").value;
+      var xmlDom = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
+      var xmlText = Blockly.Xml.domToPrettyText(xmlDom);
+      window.localStorage.setItem(selectobject, xmlText);
+      window.localStorage.setItem("mostRecent", selectobject);
+      document.getElementById("saveInput").value = "";
+    }
+
+    function downloadBlocks() {
+      var xmlDom = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
+      var xmlText = Blockly.Xml.domToPrettyText(xmlDom);
+      var data = new Blob([xmlText], { type: 'text/plain' });
+      saveAs(data, "blocks.txt");
+    }
+    document.getElementById('file')
+      .addEventListener('change', function () {
+
+        var fr = new FileReader();
+        fr.onload = function () {
+          xml = fr.result;
+          console.log(xml);
+          if (typeof xml != "string" || xml.length < 5) {
+            return false;
+          }
+
+          try {
+            var dom = Blockly.Xml.textToDom(xml);
+            Blockly.mainWorkspace.clear();
+            Blockly.Xml.domToWorkspace(dom, Blockly.mainWorkspace);
+            return true;
+          } catch (e) {
+            return false;
+          }
+        }
+
+        fr.readAsText(this.files[0]);
+      })
+
+    function clearSave() {
+      window.localStorage.clear();
+      var selectobject = document.getElementById("usr");
+      for (var i = 0; i < selectobject.length; i++) {
+        selectobject.remove(i);
+      }
+    }
+
+
+    function allStorage() {
+        var values = [],
+          keys = Object.keys(localStorage),
+          i = keys.length;
+
+        while (i--) {
+          values.push(localStorage.getItem(keys[i]));
+        }
+
+        return keys;
+      }
+
+    window.onload = (event) => {
+      updateDropdown()
+      if(window.localStorage.getItem('New Save') == null){
+        var xmlDom = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
+        var xmlText = Blockly.Xml.domToPrettyText(xmlDom);
+        window.localStorage.setItem("New Save", xmlText);
+      }
+      
+
+      nameArr = allStorage();
+      console.log(nameArr);
+      var x = document.getElementById("dropdownFiles2");
+      for (let i = 0; i < nameArr.length; i++) {
+        if(nameArr[i] != "mostRecent"){
+          var option = document.createElement("option");
+          option.value = nameArr[i];
+          option.text = nameArr[i];
+          x.add(option);
+        }
+      }
+      saveStr = window.localStorage.getItem("mostRecent");
+      document.getElementById('dropdownFiles2').value=saveStr;
+      console.log(saveStr);
+      xml = window.localStorage.getItem(saveStr);
+      if (typeof xml != "string" || xml.length < 5) {
+        return false;
+      }
+
+      try {
+        var dom = Blockly.Xml.textToDom(xml);
+        Blockly.mainWorkspace.clear();
+        Blockly.Xml.domToWorkspace(Blockly.mainWorkspace, dom);
+        return true;
+      } catch (e) {
+        return false;
+      }
+
+
+
+    };
+
+    function removeOptions(selectElement) {
+      var i, L = selectElement.options.length - 1;
+      for(i = L; i >= 0; i--) {
+          selectElement.remove(i);
+      }
+    }
+
+    function updateDropdown(){
+      nameArr = allStorage();
+      console.log(nameArr);
+      var x = document.getElementById("dropdownFiles");
+      removeOptions(x);
+      var y = document.getElementById("dropdownFiles2");
+      removeOptions(y);
+      var z = document.getElementById("dropdownFiles3");
+      removeOptions(z);
+      console.log(nameArr);
+      for (let i = 0; i < nameArr.length; i++) {
+        if(nameArr[i] != "mostRecent"){
+          var option = document.createElement("option");
+          option.value = nameArr[i];
+          option.text = nameArr[i];
+          if(option.text != "New Save"){
+            x.appendChild(option);
+          }
+          var option = document.createElement("option");
+          option.value = nameArr[i];
+          option.text = nameArr[i];
+          y.appendChild(option);
+          var option = document.createElement("option");
+          option.value = nameArr[i];
+          option.text = nameArr[i];
+          if(option.text != "New Save"){
+            z.appendChild(option);
+          }
+        }
+      }
+
+    }
+
+    function received(urlStr) {//When received
+            var code = document.getElementById('video');
+            code.src = "http://localhost:5000/static/uploads/" + urlStr + ".mp4" ;
+            document.getElementById("video").style.display = "block"//Show video
+            var code = document.getElementById('video');
+            code.src = "http://localhost:5000/static/uploads/" + urlStr + ".mp4";
+            //document.getElementById("loading").src = "https://th.bing.com/th/id/OIP.GKoJ4X3YZVvOp-5Krqk7qAHaHa?pid=ImgDet&rs=1"//cover loading gif with while square
+            document.getElementById("loadingText").innerHTML = "";//empty text box
+            document.getElementById("loadingGif").style.display = "none"
+            window.scrollTo(0, 500);
+    }
+
+    function pingBackend() {
+      document.getElementById("loading").src = "https://th.bing.com/th/id/OIP.GKoJ4X3YZVvOp-5Krqk7qAHaHa?pid=ImgDet&rs=1"
+      document.getElementById("loadingText").innerHTML = "";//empty text box
+      // var requestOptions = {
+      //   mode: 'no-cors',
+      //   method: 'GET',
+      //   redirect: 'follow'
+      // };
+      // fetch("https://simulator-server.herokuapp.com", requestOptions)
+      //   .then(response => response.text())
+      //   .then(result =>console.long(response))
+      //   .catch(error => console.log('error', error));
+    }
+    var error = false;
+    var completed = false;
+    async function getLogs() {
+
+      var myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
+      myHeaders.append("Accept", "application/vnd.heroku+json; version=3");
+      myHeaders.append("Authorization", "Bearer 2f815750-6ed5-4e5b-8ea9-4c28b89353b4");
+
+      var requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        redirect: 'follow'
+      };
+
+      var url = "";
+
+
+      await fetch("https://api.heroku.com/apps/sim-server-robo/log-sessions?lines=100", requestOptions)
+        .then(response => response.text())
+        .then(result => JSON.parse(result))
+        .then(obj => obj.logplex_url)
+        .then(function (objUrl) {
+          url = objUrl;
+        })
+        .catch(error => console.log('error', error));
+
+      var storedText = "";
+
+      await fetch(url)
+        .then(function (response) {
+          response.text().then(function (text) {
+            if (text.includes("Your simulation will take approximately")) {
+              completed = true;
+            }
+            else if (text.includes("File")) {
+              error = true;
+            }
+          });
+        });
+
+
+    }
+
+    window.onbeforeunload = function () {
+      event.preventDefault();
+    }
+
+    async function simCode() { //When Simulate Code is clicked send code to server to run simulation
+      var formdata = new FormData();
+      document.getElementById("video").style.display = "none"//hide video
+      //document.getElementById("loading").src = "https://media1.tenor.com/images/d6cd5151c04765d1992edfde14483068/tenor.gif?itemid=5662595"//show loading gif
+      document.getElementById("loadingText").innerHTML = "Simulation Loading...";//empty text box
+      document.getElementById("loadingGif").style.display = "block"
+      // var rpsStirngNorps = "import robotarium as robotarium\nImageRoot= \"" + "\"";//the simulation code needs this line to not have rps
+      // formdata.append("code", rpsStirngNorps + updateFile());//add to text file
+      formdata.append("code", updateFile());//add to text file
+      var requestOptions = {//create post
+        //mode: 'no-cors',
+        method: 'POST',
+        body: formdata,
+        redirect: 'follow'
+      };
+      try {
+        fetch("http://localhost:5000/simulationVideo", requestOptions)//post
+        .then(function(response) {
+            return response.text();
+          }).then(function(data) {
+            received(data)
+          })
+      } catch (err) {
+        alert("There has been an error in the server, please try again later")
+      }
+    }
+  </script>
+
+</body>
+
+</html>
